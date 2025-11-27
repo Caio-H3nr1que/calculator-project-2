@@ -1,0 +1,62 @@
+name: CI/CD Calculadora
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Instalar dependências
+      run: npm install
+      
+    - name: Executar testes unitários
+      run: npm test -- tests/unit.test.js
+      
+    - name: Executar testes de integração
+      run: npm test -- tests/integration.test.js
+      
+    - name: Executar testes E2E
+      run: npm test -- tests/e2e.test.js
+      
+    - name: Executar todos os testes com cobertura
+      run: npm run test:coverage
+      
+    - name: Upload relatório de cobertura
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: true
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+      
+    - name: Deploy para GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./
+        force_orphan: true

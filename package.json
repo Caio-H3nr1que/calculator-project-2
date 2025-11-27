@@ -1,0 +1,35 @@
+{
+  "name": "calculadora-teste",
+  "version": "1.0.0",
+  "description": "Calculadora com testes automatizados",
+  "main": "script.js",
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest tests/unit.test.js",
+    "test:integration": "jest tests/integration.test.js",
+    "test:e2e": "jest tests/e2e.test.js",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/tests/setup.js"],
+    "collectCoverage": true,
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    },
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/"
+    ]
+  }
+}
