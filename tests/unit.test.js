@@ -1,3 +1,5 @@
+const { Calculator, CalculatorUI } = require('../script.js');
+
 describe('Testes Unitários - Funções de Cálculo', () => {
     test('Soma de dois números positivos', () => {
         expect(Calculator.add(2, 3)).toBe(5);
@@ -45,5 +47,45 @@ describe('Testes Unitários - Funções de Cálculo', () => {
 
     test('Raiz quadrada de número negativo deve lançar erro', () => {
         expect(() => Calculator.squareRoot(-4)).toThrow('Raiz quadrada de número negativo');
+    });
+});
+
+describe('Testes Unitários - Formatação de Resultados', () => {
+    let calculator;
+
+    beforeEach(() => {
+        calculator = Object.create(CalculatorUI);
+    });
+
+    test('Formatação de número inteiro', () => {
+        expect(calculator.formatResult(42)).toBe(42);
+    });
+
+    test('Formatação de número com uma casa decimal', () => {
+        expect(calculator.formatResult(3.1)).toBe(3.1);
+    });
+
+    test('Formatação de número com muitas casas decimais', () => {
+        expect(calculator.formatResult(3.14159265359)).toBe(3.141593);
+    });
+
+    test('Formatação de número com zeros à direita', () => {
+        expect(calculator.formatResult(2.500000)).toBe(2.5);
+    });
+
+    test('Formatação de zero', () => {
+        expect(calculator.formatResult(0)).toBe(0);
+    });
+
+    test('Formatação de número negativo', () => {
+        expect(calculator.formatResult(-3.14159)).toBe(-3.14159);
+    });
+
+    test('Formatação de infinito deve lançar erro', () => {
+        expect(() => calculator.formatResult(Infinity)).toThrow('Resultado não é um número finito');
+    });
+
+    test('Formatação de NaN deve lançar erro', () => {
+        expect(() => calculator.formatResult(NaN)).toThrow('Resultado não é um número finito');
     });
 });

@@ -79,6 +79,37 @@ describe('Testes de Integração - Fluxo da Calculadora', () => {
 
     test('Formatação de resultado com muitas casas decimais', () => {
         const result = calculator.formatResult(3.14159265359);
-        expect(result.toString()).toHaveLength(9); // 3.141593
+        expect(result).toBe(3.141593);
+        expect(result.toString()).toHaveLength(8); // "3.141593" tem 8 caracteres
+    });
+
+    test('Formatação de resultado inteiro', () => {
+        const result = calculator.formatResult(42);
+        expect(result).toBe(42);
+        expect(result.toString()).toHaveLength(2);
+    });
+
+    test('Formatação de resultado com poucas casas decimais', () => {
+        const result = calculator.formatResult(2.5);
+        expect(result).toBe(2.5);
+        expect(result.toString()).toHaveLength(3);
+    });
+
+    test('Divisão que resulta em número decimal', () => {
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('/');
+        calculator.appendToDisplay('3');
+        calculator.calculate();
+
+        expect(display.value).toContain('0.333333');
+    });
+
+    test('Operação com número negativo', () => {
+        calculator.appendToDisplay('5');
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('8');
+        calculator.calculate();
+
+        expect(display.value).toContain('-3');
     });
 });

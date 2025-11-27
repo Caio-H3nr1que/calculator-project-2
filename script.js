@@ -68,7 +68,7 @@ const CalculatorUI = {
             const result = Calculator.squareRoot(num);
             
             document.getElementById('display').value = `√${input} = ${this.formatResult(result)}`;
-            this.currentInput = result.toString();
+            this.currentInput = this.formatResult(result).toString();
             this.operator = '';
             this.previousInput = '';
         } catch (error) {
@@ -107,7 +107,7 @@ const CalculatorUI = {
             document.getElementById('display').value = 
                 `${this.previousInput} ${this.getOperatorSymbol(this.operator)} ${this.currentInput} = ${this.formatResult(result)}`;
             
-            this.currentInput = result.toString();
+            this.currentInput = this.formatResult(result).toString();
             this.operator = '';
             this.previousInput = '';
         } catch (error) {
@@ -116,8 +116,21 @@ const CalculatorUI = {
     },
 
     formatResult: function(result) {
-        // Arredonda para evitar números com muitas casas decimais
-        return Math.round(result * 1000000) / 1000000;
+        // Verifica se o resultado é um número válido
+        if (!isFinite(result)) {
+            throw new Error('Resultado não é um número finito');
+        }
+
+        // Para números muito pequenos ou muito grandes, usa notação científica
+        if (Math.abs(result) < 1e-6 || Math.abs(result) > 1e9) {
+            return parseFloat(result.toExponential(6));
+        }
+
+        // Para números normais, arredonda para 6 casas decimais
+        const rounded = Math.round(result * 1e6) / 1e6;
+        
+        // Remove zeros desnecessários à direita
+        return parseFloat(rounded.toFixed(6));
     },
 
     showError: function(message) {

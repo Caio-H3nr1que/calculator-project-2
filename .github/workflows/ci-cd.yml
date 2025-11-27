@@ -28,13 +28,13 @@ jobs:
       run: npm install
       
     - name: Executar testes unitários
-      run: npm test -- tests/unit.test.js
+      run: npm run test:unit
       
     - name: Executar testes de integração
-      run: npm test -- tests/integration.test.js
+      run: npm run test:integration
       
     - name: Executar testes E2E
-      run: npm test -- tests/e2e.test.js
+      run: npm run test:e2e
       
     - name: Executar todos os testes com cobertura
       run: npm run test:coverage
