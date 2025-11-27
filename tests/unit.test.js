@@ -41,6 +41,10 @@ describe('Testes Unitários - Funções de Cálculo', () => {
         expect(Calculator.power(5, 0)).toBe(1);
     });
 
+    test('Potência com expoente negativo', () => {
+        expect(Calculator.power(2, -2)).toBe(0.25);
+    });
+
     test('Raiz quadrada de número positivo', () => {
         expect(Calculator.squareRoot(16)).toBe(4);
     });
@@ -48,44 +52,132 @@ describe('Testes Unitários - Funções de Cálculo', () => {
     test('Raiz quadrada de número negativo deve lançar erro', () => {
         expect(() => Calculator.squareRoot(-4)).toThrow('Raiz quadrada de número negativo');
     });
+
+    test('Raiz quadrada de zero', () => {
+        expect(Calculator.squareRoot(0)).toBe(0);
+    });
 });
 
-describe('Testes Unitários - Formatação de Resultados', () => {
+describe('Testes Unitários - Funções da Interface', () => {
     let calculator;
 
     beforeEach(() => {
         calculator = Object.create(CalculatorUI);
+        document.body.innerHTML = '<input type="text" id="display" readonly>';
     });
 
-    test('Formatação de número inteiro', () => {
-        expect(calculator.formatResult(42)).toBe(42);
+    test('getOperatorSymbol retorna símbolos corretos', () => {
+        expect(calculator.getOperatorSymbol('+')).toBe('+');
+        expect(calculator.getOperatorSymbol('-')).toBe('-');
+        expect(calculator.getOperatorSymbol('*')).toBe('×');
+        expect(calculator.getOperatorSymbol('/')).toBe('÷');
+        expect(calculator.getOperatorSymbol('^')).toBe('^');
+        expect(calculator.getOperatorSymbol('√')).toBe('√');
+        expect(calculator.getOperatorSymbol('unknown')).toBe('unknown');
     });
 
-    test('Formatação de número com uma casa decimal', () => {
-        expect(calculator.formatResult(3.1)).toBe(3.1);
+    test('showError exibe mensagem de erro', () => {
+        calculator.showError('Teste de erro');
+        const display = document.getElementById('display');
+        expect(display.value).toBe('Erro: Teste de erro');
+        expect(calculator.currentInput).toBe('');
+        expect(calculator.operator).toBe('');
+        expect(calculator.previousInput).toBe('');
     });
 
-    test('Formatação de número com muitas casas decimais', () => {
-        expect(calculator.formatResult(3.14159265359)).toBe(3.141593);
+    test('clearDisplay limpa tudo', () => {
+        calculator.currentInput = '123';
+        calculator.operator = '+';
+        calculator.previousInput = '456';
+        calculator.clearDisplay();
+        
+        expect(calculator.currentInput).toBe('');
+        expect(calculator.operator).toBe('');
+        expect(calculator.previousInput).toBe('');
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
     });
 
-    test('Formatação de número com zeros à direita', () => {
-        expect(calculator.formatResult(2.500000)).toBe(2.5);
+    test('clearEntry limpa apenas entrada atual', () => {
+        calculator.currentInput = '123';
+        calculator.operator = '+';
+        calculator.previousInput = '456';
+        calculator.clearEntry();
+        
+        expect(calculator.currentInput).toBe('');
+        expect(calculator.operator).toBe('+');
+        expect(calculator.previousInput).toBe('456');
     });
 
-    test('Formatação de zero', () => {
-        expect(calculator.formatResult(0)).toBe(0);
+    test('handleSquareRoot com número negativo mostra erro', () => {
+        calculator.currentInput = '-4';
+        calculator.handleSquareRoot();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toContain('Erro: Raiz quadrada de número negativo');
     });
 
-    test('Formatação de número negativo', () => {
-        expect(calculator.formatResult(-3.14159)).toBe(-3.14159);
+    test('handleSquareRoot sem input não faz nada', () => {
+        calculator.currentInput = '';
+        calculator.previousInput = '';
+        calculator.handleSquareRoot();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
     });
 
-    test('Formatação de infinito deve lançar erro', () => {
-        expect(() => calculator.formatResult(Infinity)).toThrow('Resultado não é um número finito');
+    test('handleSquareRoot com apenas sinal negativo não faz nada', () => {
+        calculator.currentInput = '-';
+        calculator.handleSquareRoot();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
     });
 
-    test('Formatação de NaN deve lançar erro', () => {
-        expect(() => calculator.formatResult(NaN)).toThrow('Resultado não é um número finito');
+    test('calculate sem operador não faz nada', () => {
+        calculator.currentInput = '5';
+        calculator.operator = '';
+        calculator.previousInput = '3';
+        calculator.calculate();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
+    });
+
+    test('calculate sem currentInput não faz nada', () => {
+        calculator.currentInput = '';
+        calculator.operator = '+';
+        calculator.previousInput = '3';
+        calculator.calculate();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
+    });
+
+    test('calculate com apenas sinal negativo não faz nada', () => {
+        calculator.currentInput = '-';
+        calculator.operator = '+';
+        calculator.previousInput = '3';
+        calculator.calculate();
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('');
+    });
+
+    test('appendToDisplay permite sinal negativo no início', () => {
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('5');
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('-5');
+    });
+
+    test('appendToDisplay não permite sinal negativo no meio do número', () => {
+        calculator.appendToDisplay('5');
+        calculator.appendToDisplay('-'); // Deve ser tratado como operador
+        
+        const display = document.getElementById('display');
+        expect(display.value).toBe('5 - ');
     });
 });

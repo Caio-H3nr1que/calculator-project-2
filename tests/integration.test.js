@@ -30,6 +30,16 @@ describe('Testes de Integração - Fluxo da Calculadora', () => {
         expect(calculator.previousInput).toBe('');
     });
 
+    test('Fluxo completo de subtração', () => {
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('0');
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('4');
+        calculator.calculate();
+
+        expect(display.value).toContain('6');
+    });
+
     test('Fluxo completo de multiplicação', () => {
         calculator.appendToDisplay('4');
         calculator.appendToDisplay('*');
@@ -37,6 +47,16 @@ describe('Testes de Integração - Fluxo da Calculadora', () => {
         calculator.calculate();
 
         expect(display.value).toContain('24');
+    });
+
+    test('Fluxo completo de divisão', () => {
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('5');
+        calculator.appendToDisplay('/');
+        calculator.appendToDisplay('3');
+        calculator.calculate();
+
+        expect(display.value).toContain('5');
     });
 
     test('Fluxo completo com potência', () => {
@@ -49,10 +69,30 @@ describe('Testes de Integração - Fluxo da Calculadora', () => {
     });
 
     test('Fluxo com raiz quadrada', () => {
-        calculator.appendToDisplay('25');
+        calculator.appendToDisplay('2');
+        calculator.appendToDisplay('5');
         calculator.handleSquareRoot();
 
         expect(display.value).toContain('5');
+    });
+
+    test('Fluxo com número decimal', () => {
+        calculator.appendToDisplay('3');
+        calculator.appendToDisplay('.');
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('4');
+        
+        expect(display.value).toBe('3.14');
+    });
+
+    test('Não permite múltiplos pontos decimais', () => {
+        calculator.appendToDisplay('3');
+        calculator.appendToDisplay('.');
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('.');
+        calculator.appendToDisplay('4');
+        
+        expect(display.value).toBe('3.14');
     });
 
     test('Limpar display', () => {
@@ -77,39 +117,69 @@ describe('Testes de Integração - Fluxo da Calculadora', () => {
         expect(calculator.currentInput).toBe('');
     });
 
-    test('Formatação de resultado com muitas casas decimais', () => {
-        const result = calculator.formatResult(3.14159265359);
-        expect(result).toBe(3.141593);
-        expect(result.toString()).toHaveLength(8); // "3.141593" tem 8 caracteres
-    });
-
-    test('Formatação de resultado inteiro', () => {
-        const result = calculator.formatResult(42);
-        expect(result).toBe(42);
-        expect(result.toString()).toHaveLength(2);
-    });
-
-    test('Formatação de resultado com poucas casas decimais', () => {
-        const result = calculator.formatResult(2.5);
-        expect(result).toBe(2.5);
-        expect(result.toString()).toHaveLength(3);
-    });
-
-    test('Divisão que resulta em número decimal', () => {
-        calculator.appendToDisplay('1');
+    test('Divisão por zero mostra erro', () => {
+        calculator.appendToDisplay('5');
         calculator.appendToDisplay('/');
-        calculator.appendToDisplay('3');
+        calculator.appendToDisplay('0');
         calculator.calculate();
 
-        expect(display.value).toContain('0.333333');
+        expect(display.value).toContain('Erro: Divisão por zero');
+    });
+
+    test('Raiz quadrada de número negativo mostra erro', () => {
+        // Primeiro digita o número negativo
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('4');
+        
+        // Agora calcula a raiz quadrada
+        calculator.handleSquareRoot();
+
+        expect(display.value).toContain('Erro: Raiz quadrada de número negativo');
     });
 
     test('Operação com número negativo', () => {
-        calculator.appendToDisplay('5');
         calculator.appendToDisplay('-');
+        calculator.appendToDisplay('5');
+        calculator.appendToDisplay('+');
         calculator.appendToDisplay('8');
         calculator.calculate();
 
-        expect(display.value).toContain('-3');
+        expect(display.value).toContain('3');
+    });
+
+    test('Múltiplas operações em sequência', () => {
+        calculator.appendToDisplay('1');
+        calculator.appendToDisplay('0');
+        calculator.appendToDisplay('+');
+        calculator.appendToDisplay('5');
+        calculator.calculate(); // 15
+        
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('3');
+        calculator.calculate(); // 12
+
+        expect(display.value).toContain('12');
+    });
+
+    test('Raiz quadrada de zero', () => {
+        calculator.appendToDisplay('0');
+        calculator.handleSquareRoot();
+
+        expect(display.value).toContain('0');
+    });
+
+    test('Número negativo simples', () => {
+        calculator.appendToDisplay('-');
+        calculator.appendToDisplay('5');
+        
+        expect(display.value).toBe('-5');
+    });
+
+    test('Não permite sinal negativo no meio do número', () => {
+        calculator.appendToDisplay('5');
+        calculator.appendToDisplay('-'); // Isso deve ser tratado como operador
+        calculator.appendToDisplay('3');
+        
+        expect(display.value).toBe('5 - 3');
     });
 });

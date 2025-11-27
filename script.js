@@ -26,6 +26,13 @@ const CalculatorUI = {
         if (['+', '-', '*', '/', '^', '√'].includes(value)) {
             if (this.currentInput === '' && value !== '-') return;
             
+            // Permite sinal negativo como primeiro caractere de um número
+            if (value === '-' && this.currentInput === '') {
+                this.currentInput = '-';
+                display.value = '-';
+                return;
+            }
+            
             if (this.operator && this.currentInput) {
                 this.calculate();
             }
@@ -42,6 +49,9 @@ const CalculatorUI = {
             display.value = this.previousInput + ' ' + this.getOperatorSymbol(value) + ' ';
         } else {
             if (value === '.' && this.currentInput.includes('.')) return;
+            // Permite apenas um sinal negativo no início
+            if (value === '-' && this.currentInput !== '' && this.currentInput !== '-') return;
+            
             this.currentInput += value;
             display.value = (this.operator ? this.previousInput + ' ' + this.getOperatorSymbol(this.operator) + ' ' : '') + this.currentInput;
         }
@@ -61,14 +71,15 @@ const CalculatorUI = {
 
     handleSquareRoot: function() {
         try {
+            // Usa currentInput se disponível, senão usa previousInput
             const input = this.currentInput || this.previousInput;
-            if (!input) return;
+            if (!input || input === '-') return;
             
             const num = parseFloat(input);
             const result = Calculator.squareRoot(num);
             
-            document.getElementById('display').value = `√${input} = ${this.formatResult(result)}`;
-            this.currentInput = this.formatResult(result).toString();
+            document.getElementById('display').value = `√${input} = ${result}`;
+            this.currentInput = result.toString();
             this.operator = '';
             this.previousInput = '';
         } catch (error) {
@@ -77,7 +88,7 @@ const CalculatorUI = {
     },
 
     calculate: function() {
-        if (!this.operator || this.currentInput === '') return;
+        if (!this.operator || this.currentInput === '' || this.currentInput === '-') return;
         
         try {
             const num1 = parseFloat(this.previousInput);
@@ -105,32 +116,14 @@ const CalculatorUI = {
             }
             
             document.getElementById('display').value = 
-                `${this.previousInput} ${this.getOperatorSymbol(this.operator)} ${this.currentInput} = ${this.formatResult(result)}`;
+                `${this.previousInput} ${this.getOperatorSymbol(this.operator)} ${this.currentInput} = ${result}`;
             
-            this.currentInput = this.formatResult(result).toString();
+            this.currentInput = result.toString();
             this.operator = '';
             this.previousInput = '';
         } catch (error) {
             this.showError(error.message);
         }
-    },
-
-    formatResult: function(result) {
-        // Verifica se o resultado é um número válido
-        if (!isFinite(result)) {
-            throw new Error('Resultado não é um número finito');
-        }
-
-        // Para números muito pequenos ou muito grandes, usa notação científica
-        if (Math.abs(result) < 1e-6 || Math.abs(result) > 1e9) {
-            return parseFloat(result.toExponential(6));
-        }
-
-        // Para números normais, arredonda para 6 casas decimais
-        const rounded = Math.round(result * 1e6) / 1e6;
-        
-        // Remove zeros desnecessários à direita
-        return parseFloat(rounded.toFixed(6));
     },
 
     showError: function(message) {
